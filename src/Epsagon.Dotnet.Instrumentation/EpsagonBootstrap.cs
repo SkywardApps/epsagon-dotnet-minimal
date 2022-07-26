@@ -10,36 +10,12 @@ using Epsagon.Dotnet.Instrumentation.EFCore;
 using Epsagon.Dotnet.Instrumentation.HttpClients;
 using Epsagon.Dotnet.Tracing.OpenTracingJaeger;
 
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
 
 namespace Epsagon.Dotnet.Instrumentation {
     public static class EpsagonBootstrap {
         private static readonly IConfigurationService configurationService = new ConfigurationService();
 
         public static void Bootstrap(bool useOpenTracingCollector = false, IEpsagonConfiguration configuration = null) {
-            var levelSwitch = new LoggingLevelSwitch(LogEventLevel.Error);
-            if ((Environment.GetEnvironmentVariable("EPSAGON_DEBUG") ?? "").ToLower() == "true") {
-                levelSwitch.MinimumLevel = LogEventLevel.Debug;
-            }
-
-            var loggerConfig = new LoggerConfiguration()
-                .MinimumLevel.ControlledBy(levelSwitch)
-                .Enrich.FromLogContext()
-                .WriteTo.Console();
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-                loggerConfig.WriteTo.EventLog("Epsagon");
-            }
-
-            var logConfig = configuration?.LogFile ?? Environment.GetEnvironmentVariable("EPSAGON_LOG_FILE");
-            if (!string.IsNullOrWhiteSpace(logConfig)) {
-                loggerConfig.WriteTo.File(logConfig);
-            }
-
-            Log.Logger = loggerConfig.CreateLogger();
-
             if ((Environment.GetEnvironmentVariable("DISABLE_EPSAGON") ?? "").ToUpper() != "TRUE") {
                 if (configuration != null) { Utils.RegisterConfiguration(configuration); } else { Utils.RegisterConfiguration(LoadConfiguration()); }
                 CustomizePipeline();

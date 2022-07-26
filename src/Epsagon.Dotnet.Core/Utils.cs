@@ -93,9 +93,7 @@ namespace Epsagon.Dotnet.Core {
         }
 
         public static void DebugLogIfEnabled(string format, params object[] args) {
-            if (Log.IsEnabled(Serilog.Events.LogEventLevel.Debug)) {
-                Log.Debug(format, args);
-            }
+            Log.Debug(format, args);
         }
 
         public static void AddDisposable(IDisposable disposable) {
